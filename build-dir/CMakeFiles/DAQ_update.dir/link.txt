@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/DAQ_update.dir/DAQ_update.cpp.o  -o DAQ_update -rdynamic /usr/local/lib/libhidapi-libusb.so /usr/local/lib/libmccusb.so /usr/local/lib/libhidapi-hidraw.so -Wl,-rpath,/usr/local/lib 

@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/elizabeth/DAQ_Control/DAQ_update.cpp
+stdlib.h
+-
+stdio.h
+-
+iostream
+-
+vector
+-
+string.h
+-
+unistd.h
+-
+fcntl.h
+-
+ctype.h
+-
+stdint.h
+-
+math.h
+-
+pmd.h
+/home/elizabeth/DAQ_Control/pmd.h
+usb-3100.h
+/home/elizabeth/DAQ_Control/usb-3100.h
+
+/usr/local/include/libusb/pmd.h
+libusb-1.0/libusb.h
+-
+hidapi/hidapi.h
+/usr/local/include/libusb/hidapi/hidapi.h
+time.h
+-
+
+/usr/local/include/libusb/usb-3100.h
+
