@@ -33,9 +33,9 @@ int main(int argc, char** argv)
 {
   
   hid_device *hid = 0x0;
-  float volts, voltsoff;
+  float volts, voltsoff, volts2;
   int flag;
-  uint8_t channel, fwd_byte, rev_byte, update; //range
+  uint8_t channel, fwd_byte, rev_byte, update, dpinz, dpinx, direction; //range
   int8_t range{1};
   int temp, i;
   int ch, stop_ch;
@@ -43,7 +43,8 @@ int main(int argc, char** argv)
   uint16_t value, valueoff;
   wchar_t serial[64];
   wchar_t wstr[MAX_STR];
-  double amplitude, wave_freq, update_rate, dt, cycle_length, total_time;
+  double amplitude, update_rate, dt, cycle_length, total_time; //wave_freq
+  float wave_freq;
   int ret;
   uint8_t memory[62];
   std::vector<float> buffer;
@@ -76,6 +77,9 @@ int main(int argc, char** argv)
   }
 
   update_rate = 50; // update current through coils at 50 Hz (50 times per second)
+  dpinz = 4;
+  dpinx = 2;
+  direction = 0;
 
   while(1) {
   printf("\nDAQ Update for Helical Swimmer OL Control\n");
@@ -93,7 +97,8 @@ int main(int argc, char** argv)
     case 'i':
     printf("Enter frequency [0-30Hz]: \n");
     scanf("%d", &temp);
-    wave_freq = (uint8_t) temp; //user-defined frequency of sine wave xx Hz = xx cycle / sec
+    wave_freq = (float) temp; //user-defined frequency of sine wave xx Hz = xx cycle / sec
+    std::cout << wave_freq << std::endl;
     amplitude = 1.0;
     // float buffer[50]; // buffer size should be the same as the update rate
     // float buffer2[50]; // buffer size should be the same as the update rate
@@ -123,27 +128,50 @@ int main(int argc, char** argv)
       fwd_byte = 0;
       rev_byte = 0xff;
       usbDConfigPort_USB31XX(hid, DIO_DIR_OUT);
-
+      // usbDConfigBit_USB31XX(hid, dpinz, direction);
+      // usbDConfigBit_USB31XX(hid, dpinx, direction);
       range = (uint8_t) 0; // 0 = 0-10V, 1 = +/- 10V  2 = 0-20 mA
-      for (int i = 0; i<=update_rate; i++){
-        std::cout << buffer[i] << ".\n";
-        if (buffer[i] < 0) {
-          // flip DIO pin to reverse current 
-          usbDOut_USB31XX(hid, rev_byte);
-          volts = buffer[i] * -1;
-        }
-        else {
-          usbDOut_USB31XX(hid, fwd_byte);
-          volts = buffer[i];
-        }
-          channel = (uint8_t) 0; // channel on DAQ for analog voltage output 0 - 15
+      for (int k = 0; k<=2; k++){
+		  for (int i = 0; i<=update_rate; i++){
+		    std::cout << buffer[i] << " " << buffer2[i] << ".\n";
+		    if (buffer[i] < 0) {
+		      // flip DIO pin to reverse current 
+		      usbDBitOut_USB31XX(hid, dpinz, rev_byte);
+		      //usbDOut_USB31XX(hid, rev_byte);
+		      volts = buffer[i] * -1;
+		    }else {
+		      usbDBitOut_USB31XX(hid, dpinz, fwd_byte);
+		      //usbDOut_USB31XX(hid, fwd_byte);
+		      volts = buffer[i];
+		    }
+		    if (buffer2[i] < 0) {
+		    	// flip DIO pin to reverse current 
+		    	usbDBitOut_USB31XX(hid, dpinx, rev_byte);
+		    	volts2 = buffer2[i] * -1;
+		    }
+		    else {
+		      usbDBitOut_USB31XX(hid, dpinx, fwd_byte);
+		      //usbDOut_USB31XX(hid, fwd_byte);
+		      volts2 = buffer2[i];
+		    }
+		      channel = (uint8_t) 0; // channel on DAQ for analog voltage output 0 - 15
 
-          value = volts_USB31XX(range, volts);
-          usbAOutConfig_USB31XX(hid, channel, range);
-          usbAOut_USB31XX(hid, channel, value, 0);
-          // std::cout << buffer2[i] << ".\n";
-          usleep(1000000);
-        }
+		      value = volts_USB31XX(range, volts);
+		      usbAOutConfig_USB31XX(hid, channel, range);
+		      usbAOut_USB31XX(hid, channel, value, 0);
+
+		      channel = (uint8_t) 2; // channel on DAQ for analog voltage output 0 - 15
+
+		      value = volts_USB31XX(range, volts2);
+		      usbAOutConfig_USB31XX(hid, channel, range);
+		      usbAOut_USB31XX(hid, channel, value, 0);
+
+		      // std::cout << buffer2[i] << ".\n";
+		      usleep(1/update_rate*1000000);
+		    }
+        k = k+1;
+    	}
+    
 
       volts = 0;
       value = volts_USB31XX(range, volts);

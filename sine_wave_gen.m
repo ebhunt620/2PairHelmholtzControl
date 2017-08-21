@@ -1,12 +1,12 @@
 clear all;
-amplitude = 5.0;
+amplitude = 1.0;
 
 update_rate = 50; % update current through coils at 10 Hz (20 times per second)
 dt = 1/update_rate; % time between samples
 
 cycle_length = 2*pi; % sine wave has a cycle length of 2pi
 
-num_cycles = 2;
+num_cycles = 1;
 wave_freq = 2; % sine wave frequency is 1 Hz = 1 cycle / sec
 
 total_time = 1; %1 second; final time for 1 cycle/ 1 waveform.
