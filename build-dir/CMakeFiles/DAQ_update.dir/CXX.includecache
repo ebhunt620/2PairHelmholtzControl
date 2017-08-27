@@ -27,6 +27,10 @@ stdint.h
 -
 math.h
 -
+time.h
+-
+chrono
+-
 pmd.h
 /home/elizabeth/DAQ_Control/pmd.h
 usb-3100.h
