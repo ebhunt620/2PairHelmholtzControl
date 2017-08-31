@@ -15,16 +15,16 @@ import cv2
 
 # squareSize of physical checkerboard in mm
 # squareSize = 3 # small board
-squareSize = 36.4 # big board
-
+# squareSize = 36.4 # big board
+squareSize = 20 # cell phone
 print "Press 1 to Begin Camera Calibration with Capture of 10 images. Move camera to different positions while keeping the checkerboard flat on the table. If you do not want to capture images, press 0"
 cv2.waitKey(0)
 do_calib = int(raw_input("Choose 0 or 1: "))
 # Take a series of at least 10 images
-nimgs = 10
-dst_root = "/home/elizabeth/Code/DAQ_Control_Video/cam_calib_imgs"
+nimgs = 15
+dst_root = "/home/elizabeth/DAQ_Control/DAQ_Control_Process_Data/cam_calib_imgs"
 if do_calib == 1:
-	src_root = "/home/elizabeth/Code/DAQ_Control_Video"
+	src_root = "/home/elizabeth/DAQ_Control/DAQ_Control_Process_Data"
 	for x in xrange(nimgs):
 		print "Capturing Image %d/%d" % (x+1, nimgs)
 		dst_filename = "cam_cal_img_%d.jpg" % (x)
@@ -48,12 +48,13 @@ if do_calib == 1:
 
 # Size of checkerboard pattern in images
 # patternSize = (9,7) # small board
-patternSize = (9,6) # big board 
+# patternSize = (9,6) # big board 
+patternSize = (8, 6) # cell phone
 
 # prepare physical checkerboard object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
-objp = np.zeros((6*9,3), np.float32)
+objp = np.zeros((8*6,3), np.float32)
 
-objp[:,:2] = np.mgrid[0:9*squareSize:squareSize, 0:6*squareSize:squareSize].T.reshape(-1,2)
+objp[:,:2] = np.mgrid[0:8*squareSize:squareSize, 0:6*squareSize:squareSize].T.reshape(-1,2)
 
 # Arrays to store object points and image points from all the images.
 objpoints = [] # 3d point in real world space

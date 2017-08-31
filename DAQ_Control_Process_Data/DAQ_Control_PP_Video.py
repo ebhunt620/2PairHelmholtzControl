@@ -6,6 +6,7 @@ import time
 import shutil, glob
 import csv
 import datetime
+from numpy.linalg import inv
 
 def nothing(x):
     pass
@@ -88,7 +89,7 @@ def detectContours(frame0_roi,frame0_bin,contour_info,position_info,blackOnWhite
     # cv2.circle(im_with_contours, (cX, cY), 7, (255, 255, 255), -1)
     # cv2.imshow("Image", im_with_contours)
     # cv2.waitKey(0)
-    temp_position_info = np.array([cX, cY])
+    temp_position_info = np.array([cX, cY, 1])
     position_info.append(temp_position_info) 
     # loop over the contours. THis is if you cared about multiple contours
     # for cnt in contours:
@@ -115,8 +116,8 @@ def detectContours(frame0_roi,frame0_bin,contour_info,position_info,blackOnWhite
 # the name of a video file. If one camera is connected pass 0. To select a
 # second camera, pass 1, etc.
 #cap = cv2.VideoCapture(1)
-filename = "SaveToAvi-Uncompressed-14434226-0000"
-cap = cv2.VideoCapture("/home/elizabeth/Dropbox/%s.avi" % filename)
+filename = "23Full_45_10_water_1_1_a_AVI-0000"
+cap = cv2.VideoCapture("/home/elizabeth/Dropbox/Soft_Agar_Robot_Videos_3/%s.avi" % filename)
 
 # Check if camera opened successfully
 if (cap.isOpened()== False): 
@@ -257,24 +258,47 @@ while(cap.isOpened()):
         break
 print("{0} out of {1} frames were processed.".format(len(num_frames), frame_count))
 print "Saving Data..."
-K = np.loadtxt('/home/elizabeth/Code/DAQ_Control_Video/Kintrins_cam.txt',delimiter=',')
+K = np.loadtxt('/home/elizabeth/DAQ_Control/DAQ_Control_Process_Data/Kintrins_cam.txt',delimiter=',')
 now = datetime.datetime.now()
 
+# Calculate average velocity in the x direction in pixels / s
+avg_vel_pix = abs(position_info[0][0]-position_info[-1][0])/time_stamp[-1]
+scale = 8.1 # pixels / mm
+avg_vel_mm = avg_vel_pix / scale
 f = open("%s.csv" % filename, "wb")
 writer = csv.writer(f)
 writer.writerows([["Date",now.strftime("%Y/%m/%d")]])
 writer.writerows([["Sample",filename]])
 writer.writerows([["Frame Rate",frame_rate]])
-writer.writerows([["Average Velocity", 0, "pixels/s"]])
-writer.writerows([["Average Velocity", 0, "mm/s"]])
+writer.writerows([["Average Velocity", avg_vel_pix, "pixels/s"]])
+writer.writerows([["Average Velocity", avg_vel_mm, "mm/s"]])
 writer.writerows([["Camera Matrix",K]])
-writer.writerows([["Frame_No", "Time", "px","py"]])
-print frame_count
+writer.writerows([["Frame_No", "Time", "px","py", "mx", "my", "mz"]])
+
+
+K_inv = inv(K)
+
+# print position_info[0].reshape([3,1])
+# print np.dot(K_inv,position_info[0].reshape([3,1]))
+# cv2.waitKey(0)
+
+position_info_mm =[];
+
+for k in range(frame_count):
+	position_info_mm_temp = np.dot(K_inv, position_info[k].reshape([3,1]))
+	position_info_mm_temp = position_info_mm_temp.reshape(1,3)
+	position_info_mm.append(position_info_mm_temp)
+
+print position_info_mm[0]
+
 for k in range(frame_count):
     px = position_info[k][0]
     py = position_info[k][1]
+    mx = round(position_info_mm[k][0][0],6)
+    my = round(position_info_mm[k][0][1],6)
+    mz = round(position_info_mm[k][0][2],6)
     t = time_stamp[k]
-    writer.writerows([[k, t, px, py]])
+    writer.writerows([[k, t, px, py, mx, my, mz]])
 f.close()
 
 

@@ -6,9 +6,9 @@ dt = 1/update_rate; % time between samples
 
 cycle_length = 2*pi; % sine wave has a cycle length of 2pi
 
-wave_freq = 4; % sine wave frequency is 1 Hz = 1 cycle / sec
+wave_freq = 1; % sine wave frequency is 1 Hz = 1 cycle / sec
 
-num_cycles = 2; %1 second; final time for 1 cycle/ 1 waveform.
+num_cycles = 1; %1 second; final time for 1 cycle/ 1 waveform.
 
 % Need to scale sine wave such that 1 sine wave cycle will fit into the
 % update rate of the coils (10 samples)
